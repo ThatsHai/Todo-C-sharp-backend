@@ -1,0 +1,6 @@
+@Todolist_HostAddress = https://localhost:7081
+
+GET {{Todolist_HostAddress}}/newTasks
+Accept: application/json
+
+###

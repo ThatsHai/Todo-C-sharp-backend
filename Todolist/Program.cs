@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Entities;
+using StackExchange.Redis;
 using Todolist.Models;
 using Todolist.Services;
 using Todolist.Services.Interfaces;
@@ -21,6 +22,11 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
+
+// Add Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false")
+);
 
 var app = builder.Build();
 
@@ -83,6 +89,16 @@ app.MapGet("/test-person", async (string? firstName, string? lastName) =>
     .ExecuteAsync();
     return retrievedPerson;
     //return person;
+});
+
+app.MapGet("/redis-test", async (IConnectionMultiplexer redis) =>
+{
+    var cache = redis.GetDatabase();
+
+    await cache.StringSetAsync("hai", "hello redis");
+    var value = await cache.StringGetAsync("hai");
+
+    return value.ToString();
 });
 
 
