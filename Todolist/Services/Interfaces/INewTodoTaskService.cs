@@ -8,10 +8,11 @@ namespace Todolist.Services.Interfaces
         public Task<NewTodoTask?> GetNewTaskById(string id);
         public Task ToggleNewTask(string id);
         public Task DeleteNewTask(string id);
-        public Task<IEnumerable<NewTodoTask>> GetTasksByUserId(string userId);
+        //public Task<IEnumerable<NewTodoTask>> GetTasksByUserId(string userId);
         //public Task<PagedResult<NewTodoTask>> GetPagedTasks(string status, int page, int pageSize);
-        public IEnumerable<NewTodoTask> GetNewTasks(
+        public Task<IEnumerable<NewTodoTask>> GetNewTasks(
             string? status,
+            string? taskName,
             int page = 1,
             int pageSize = 10
         );

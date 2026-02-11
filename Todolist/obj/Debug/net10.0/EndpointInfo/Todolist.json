@@ -13,6 +13,25 @@
     }
   ],
   "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Todolist"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/newTasks": {
       "get": {
         "tags": [
@@ -27,7 +46,14 @@
             }
           },
           {
-            "name": "page",
+            "name": "taskName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
             "in": "query",
             "schema": {
               "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -36,11 +62,11 @@
                 "string"
               ],
               "format": "int32",
-              "default": 1
+              "default": 10
             }
           },
           {
-            "name": "pageSize",
+            "name": "page",
             "in": "query",
             "schema": {
               "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -90,38 +116,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/NewTodoTask"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/newTasks/users/{userId}": {
-      "get": {
-        "tags": [
-          "Todolist"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NewTodoTask"
-                  }
                 }
               }
             }
@@ -199,19 +193,51 @@
           }
         }
       }
+    },
+    "/test-person": {
+      "get": {
+        "tags": [
+          "Todolist"
+        ],
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonMongo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "NewTodoTask": {
-        "required": [
-          "id"
-        ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "taskName": {
             "type": "string"
           },
@@ -220,6 +246,31 @@
           },
           "taskCompleted": {
             "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonMongo": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string"
           }
         }
       }

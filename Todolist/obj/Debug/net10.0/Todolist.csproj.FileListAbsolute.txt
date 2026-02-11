@@ -157,3 +157,11 @@ C:\Users\LENOVO\source\repos\Todolist\Todolist\obj\Debug\net10.0\refint\Todolist
 C:\Users\LENOVO\source\repos\Todolist\Todolist\obj\Debug\net10.0\Todolist.pdb
 C:\Users\LENOVO\source\repos\Todolist\Todolist\obj\Debug\net10.0\Todolist.genruntimeconfig.cache
 C:\Users\LENOVO\source\repos\Todolist\Todolist\obj\Debug\net10.0\ref\Todolist.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\obj\Debug\net10.0\Todolist.sourcelink.json
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\DnsClient.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\MongoDB.Bson.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\MongoDB.Driver.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\MongoDB.Entities.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\SharpCompress.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\Snappier.dll
+C:\Users\LENOVO\source\repos\Todolist\Todolist\bin\Debug\net10.0\ZstdSharp.dll

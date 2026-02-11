@@ -1,127 +1,72 @@
-﻿using Todolist.Models;
+﻿using MongoDB.Entities;
+using Todolist.Models;
 using Todolist.Services.Interfaces;
 
 namespace Todolist.Services
 {
     public class NewTodoTaskService : INewTodoTaskService
     {
-        private readonly List<NewTodoTask> singleList = new()
+        public async Task<NewTodoTask?> CreateNewTask(NewTodoTask task)
         {
-            new NewTodoTask
-            {
-                Id = "1",
-                TaskName = "Learn Angular",
-                TaskUserId = "001"
-            },
-            new NewTodoTask
-            {
-                Id = "2",
-                TaskName = "Fix N+1 Query",
-                TaskUserId = "001"
-            },
-            new NewTodoTask
-            {
-                Id = "3",
-                TaskName = "Dockerize API",
-                TaskUserId = "002"
-            }
-
-    };
-        public Task<NewTodoTask?> CreateNewTask(NewTodoTask task)
-        {
-            var nextId = singleList
-                .Select(t => int.TryParse(t.Id, out var id) ? id : 0)
-                .DefaultIfEmpty(0)
-                .Max() + 1;
-            task.Id = nextId.ToString();
-            singleList.Add(task);
-            return Task.FromResult<NewTodoTask?>(task);
+            await DB.Instance().SaveAsync(task);
+            return task;
         }
 
-        public Task DeleteNewTask(string id)
+        public async Task DeleteNewTask(string id)
         {
-            var todo = singleList.FirstOrDefault(t => t.Id == id);
-            if (todo is null)
-            {
-                Console.Write("id error");
-                return Task.CompletedTask;
-                throw new BadHttpRequestException("Task not found", StatusCodes.Status404NotFound);
-            }
-
-            singleList.Remove(todo);
-            return Task.CompletedTask;
+            await DB.Instance().DeleteAsync<NewTodoTask>(id);
         }
 
-        public Task<IEnumerable<NewTodoTask>> GetAllNewTasks()
+        public async Task<IEnumerable<NewTodoTask>> GetAllNewTasks()
         {
-            return Task.FromResult<IEnumerable<NewTodoTask>>(singleList);
+            return await DB.Instance().Find<NewTodoTask>().ExecuteAsync();
         }
 
         public Task<NewTodoTask?> GetNewTaskById(string id)
         {
-            var todo = singleList.FirstOrDefault(todo => todo.Id == id);
-            return Task.FromResult(todo);
+            return DB.Instance().Find<NewTodoTask>().OneAsync(id);
         }
 
-        public Task<IEnumerable<NewTodoTask>> GetTasksByUserId(string userId)
+        public async Task ToggleNewTask(string id)
         {
-            var todos = singleList.Where(todo => todo.TaskUserId == userId);
-            return Task.FromResult<IEnumerable<NewTodoTask>>(todos);
-        }
-
-        public Task ToggleNewTask(string id)
-        {
-            var task = singleList.FirstOrDefault(todo => todo.Id == id);
-
-            if (task is null)
-                throw new KeyNotFoundException();
+            var task = await DB.Instance().Find<NewTodoTask>().OneAsync(id);
+            if (task == null) return;
 
             task.TaskCompleted = !task.TaskCompleted;
-            return Task.CompletedTask;
+            await DB.Instance().SaveAsync(task);
         }
 
-        public Task<PagedResult<NewTodoTask>> GetPagedTasks(int page, int pageSize)
-        {
-            page = page < 1 ? 1 : page;
-            pageSize = pageSize < 1 ? 10 : pageSize;
-
-            var totalItems = singleList.Count;
-
-            var items = singleList
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            return Task.FromResult(new PagedResult<NewTodoTask>
-            {
-                Items = items,
-                Page = page,
-                PageSize = pageSize,
-                TotalItems = totalItems
-            });
-        }
-
-        public IEnumerable<NewTodoTask> GetNewTasks(
+        public async Task<IEnumerable<NewTodoTask>> GetNewTasks(
             string? status,
+            string? taskName,
             int page = 1,
             int pageSize = 10
         )
         {
-            var query = status?.ToLowerInvariant() switch
+            var query = DB.Instance().Find<NewTodoTask, NewTodoTask>();
+
+            // filtering
+            if (!string.IsNullOrWhiteSpace(status))
             {
-                "completed" => singleList.Where(t => t.TaskCompleted),
-                "active" => singleList.Where(t => !t.TaskCompleted),
-                _ => singleList
-            };
+                query = status.ToLowerInvariant() switch
+                {
+                    "completed" => query.Match(t => t.TaskCompleted),
+                    "active" => query.Match(t => !t.TaskCompleted),
+                    _ => query
+                };
+            }
 
-            return query
+            if (!string.IsNullOrWhiteSpace(taskName))
+            {
+                query = query.Match(t => t.TaskName.ToLower().Contains(taskName.ToLower()));
+            }
+
+            // paging + ordering
+            return await query
+                .Sort(t => t.ID, Order.Ascending)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize);
+                .Limit(pageSize)
+                .ExecuteAsync();
         }
-
-        //public Task<PagedResult<NewTodoTask>> GetPagedTasks(string status, int page, int pageSize)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
