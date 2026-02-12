@@ -57,41 +57,45 @@ namespace Todolist.Services
 
         public async Task ToggleNewTask(string id)
         {
-            var task = await DB.Instance().Find<NewTodoTask>().OneAsync(id);
-            if (task == null) return;
+            try
+            {
+                var task = await DB.Instance().Find<NewTodoTask>().OneAsync(id);
+                if (task == null) return;
 
-            task.TaskCompleted = !task.TaskCompleted;
-            await DB.Instance().SaveAsync(task);
+                task.TaskCompleted = !task.TaskCompleted;
+                await DB.Instance().SaveAsync(task);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e);
+            }
         }
 
         public async Task<IEnumerable<NewTodoTask>> GetNewTasks(
-            string? status,
-            string? taskName,
-            int page = 1,
-            int pageSize = 10
+            TaskQueryRequest request
         )
         {
             var db = _cache.GetDatabase();
 
-            var cacheKey = $"todo:list:{status}:{taskName}:{page}:{pageSize}";
+            var cacheKey = $"todo:list:{request.Status}:{request.TaskName}:{request.Page}:{request.PageSize}";
 
-            var cacheValue = await db.StringGetAsync(cacheKey);
+            //var cacheValue = await db.StringGetAsync(cacheKey);
 
-            if (!cacheValue.IsNullOrEmpty)
-            {
-                return JsonSerializer.Deserialize<IEnumerable<NewTodoTask>>(
-                    cacheValue.ToString()
-                ) ?? Enumerable.Empty<NewTodoTask>();
-            }
+            //if (!cacheValue.IsNullOrEmpty)
+            //{
+            //    return JsonSerializer.Deserialize<IEnumerable<NewTodoTask>>(
+            //        cacheValue.ToString()
+            //    ) ?? Enumerable.Empty<NewTodoTask>();
+            //}
 
             // =========================
 
             // Build query
             var query = DB.Instance().Find<NewTodoTask, NewTodoTask>();
 
-            if (!string.IsNullOrWhiteSpace(status))
+            if (!string.IsNullOrWhiteSpace(request.Status))
             {
-                query = status.ToLowerInvariant() switch
+                query = request.Status.ToLowerInvariant() switch
                 {
                     "completed" => query.Match(t => t.TaskCompleted),
                     "active" => query.Match(t => !t.TaskCompleted),
@@ -99,17 +103,17 @@ namespace Todolist.Services
                 };
             }
 
-            if (!string.IsNullOrWhiteSpace(taskName))
+            if (!string.IsNullOrWhiteSpace(request.TaskName))
             {
                 query = query.Match(t =>
-                    t.TaskName.ToLower().Contains(taskName.ToLower())
+                    t.TaskName.ToLower().Contains(request.TaskName.ToLower())
                 );
             }
 
             var result = await query
                 .Sort(t => t.ID, MongoDB.Entities.Order.Ascending)
-                .Skip((page - 1) * pageSize)
-                .Limit(pageSize)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Limit(request.PageSize)
                 .ExecuteAsync();
 
             // Save to cache

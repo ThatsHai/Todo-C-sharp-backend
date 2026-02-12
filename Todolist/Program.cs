@@ -6,6 +6,7 @@ using Todolist.Models;
 using Todolist.Services;
 using Todolist.Services.Interfaces;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -39,11 +40,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapGet("/", () => "Welcome to the TodoList API!");
-
-app.MapGet("/newTasks", async (INewTodoTaskService service, string? status, string? taskName, int pageSize = 10, int page = 1) =>
+app.MapGet("/newTasks", async (INewTodoTaskService service, [AsParameters] TaskQueryRequest request) =>
 {
-    return await service.GetNewTasks(status, taskName, page, pageSize);
+    return await service.GetNewTasks(request);
 });
 
 app.MapGet("/newTasks/{id}", (string id, INewTodoTaskService service) =>
@@ -62,45 +61,11 @@ app.MapDelete("/newTasks/{id}", async (INewTodoTaskService service, string id) =
     return Results.NoContent();
 });
 
-
-app.MapGet("/newTasks/toggle/{id}", (INewTodoTaskService service, string id) =>
+app.MapPatch("/newTasks/toggle/{id}", async (INewTodoTaskService service, string id) =>
 {
-    service.ToggleNewTask(id);
+    await service.ToggleNewTask(id);
+    return Results.Ok();
 });
-
-
-app.MapGet("/test-person", async (string? firstName, string? lastName) =>
-{
-    //var person = new PersonMongo
-    //{
-    //    FirstName = "Jerry",
-    //    LastName = "Tom"
-    //};
-
-    //await db.SaveAsync(person);
-
-    //var retrievedPerson = await db.Find<PersonMongo>()
-    //    .Match(p => p.ID == person.ID)
-    //    .ExecuteFirstAsync();
-
-    var retrievedPerson = await db.Find<PersonMongo>()
-    .Match(p => (p.LastName == lastName) && (p.FirstName == firstName))
-    .Project(p => p.Include(x => x.FirstName))
-    .ExecuteAsync();
-    return retrievedPerson;
-    //return person;
-});
-
-app.MapGet("/redis-test", async (IConnectionMultiplexer redis) =>
-{
-    var cache = redis.GetDatabase();
-
-    await cache.StringSetAsync("hai", "hello redis");
-    var value = await cache.StringGetAsync("hai");
-
-    return value.ToString();
-});
-
 
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
