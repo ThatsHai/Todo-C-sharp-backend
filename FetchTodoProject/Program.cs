@@ -16,7 +16,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/hi", (FetchTodoService service) =>
+app.MapGet("/fetchLocalTodo", (FetchTodoService service) =>
 {
     return service.FetchTodos();
 });
