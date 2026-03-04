@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="FetchTodoProject/FetchTodoProject.csproj" Id="0a6b0f70-f0a5-491c-967d-63d876c64319" />
   <Project Path="Todolist/Todolist.csproj" />
 </Solution>

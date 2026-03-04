@@ -21,8 +21,9 @@ namespace FetchTodoProject.Services
         public async Task<NewTodoTask[]> FetchTodos()
         {
             HttpClient client = _httpClientFactory.CreateClient();
-            NewTodoTask[] todos = await client.GetFromJsonAsync<NewTodoTask[]>(
-                $"https://localhost:7081/newTasks?page=1&pageSize=4", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            NewTodoTask[]? todos = await client.GetFromJsonAsync<NewTodoTask[]>(
+                $"https://localhost:7081/newTasks?page=1&pageSize=4",
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
             return todos ?? [];
         }
     }

@@ -1,4 +1,5 @@
-﻿using MongoDB.Entities;
+﻿using FluentValidation.Results;
+using MongoDB.Entities;
 using StackExchange.Redis;
 using System.Text.Json;
 using Todolist.Models;
@@ -15,13 +16,21 @@ namespace Todolist.Services
         }
         public async Task<NewTodoTask?> CreateNewTask(NewTodoTask task)
         {
+            TaskCreateRequestValidator validator = new TaskCreateRequestValidator();
+            ValidationResult result = validator.Validate(task);
+            if (!result.IsValid)
+            {
+                return null;
+            }
             await DB.Instance().SaveAsync(task);
             return task;
         }
 
         public async Task DeleteNewTask(string id)
         {
-            await DB.Instance().DeleteAsync<NewTodoTask>(id);
+            //await DB.Instance().DeleteAsync<NewTodoTask>(id);
+            var result = await DB.Instance().DeleteAsync<NewTodoTask>(id);
+            //Console.WriteLine($"Deleted count: {result.DeletedCount}");
         }
 
         public async Task<IEnumerable<NewTodoTask>> GetAllNewTasks()
@@ -75,10 +84,16 @@ namespace Todolist.Services
             TaskQueryRequest request
         )
         {
+            TaskQueryRequestValidator validator = new TaskQueryRequestValidator();
+            ValidationResult validationResult = validator.Validate(request);
+            if (!validationResult.IsValid)
+            {
+                return Enumerable.Empty<NewTodoTask>();
+            }
             var db = _cache.GetDatabase();
 
             var cacheKey = $"todo:list:{request.Status}:{request.TaskName}:{request.Page}:{request.PageSize}";
-
+            //Redis
             //var cacheValue = await db.StringGetAsync(cacheKey);
 
             //if (!cacheValue.IsNullOrEmpty)

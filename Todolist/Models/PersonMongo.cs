@@ -8,5 +8,8 @@ namespace Todolist.Models
         public string LastName { get; set; } = string.Empty;
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
+
+        public string UserName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }
