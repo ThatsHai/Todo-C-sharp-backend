@@ -9,9 +9,10 @@ namespace Todolist.Features.Authentication
         {
             app.MapPost("/login", async (
                 LoginRequest loginRequest,
-                IAuthenticationService authService) =>
+                IAuthenticationService authService, 
+                HttpContext httpContext) =>
             {
-                var token = await authService.Login(loginRequest);
+                var token = await authService.Login(loginRequest, httpContext);
                 if (token == null)
                 {
                     return Results.Unauthorized();

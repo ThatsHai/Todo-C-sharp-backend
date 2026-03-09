@@ -30,6 +30,7 @@ namespace Todolist.Services
         {
             //await DB.Instance().DeleteAsync<NewTodoTask>(id);
             var result = await DB.Instance().DeleteAsync<NewTodoTask>(id);
+            _cache.GetDatabase().KeyDelete(id);
             //Console.WriteLine($"Deleted count: {result.DeletedCount}");
         }
 
@@ -72,6 +73,7 @@ namespace Todolist.Services
                 if (task == null) return;
 
                 task.TaskCompleted = !task.TaskCompleted;
+                _cache.GetDatabase().KeyDelete(id);
                 await DB.Instance().SaveAsync(task);
             }
             catch (Exception e)

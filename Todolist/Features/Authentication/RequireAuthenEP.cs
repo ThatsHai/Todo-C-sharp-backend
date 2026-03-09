@@ -10,7 +10,7 @@ namespace Todolist.Features.Authentication
             app.MapPost("/login/testAuthen", async (
                 IAuthenticationService authService) =>
             {
-                return "authenticated";
+                return Results.Ok(new { message = "authenticated" });
             }).RequireAuthorization();
         }
     }

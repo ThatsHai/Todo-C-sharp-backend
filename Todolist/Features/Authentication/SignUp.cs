@@ -10,7 +10,8 @@ namespace Todolist.Features.Authentication
         {
             app.MapPost("/signup", async (
                 PersonMongo person,
-                IAuthenticationService authService) =>
+                IAuthenticationService authService,
+                HttpContext httpContext) =>
             {
                 PersonMongoValidator validator = new PersonMongoValidator();
                 ValidationResult result = validator.Validate(person);
@@ -18,7 +19,11 @@ namespace Todolist.Features.Authentication
                 {
                     return Results.BadRequest(result.Errors); ;
                 }
-                var token = await authService.createUser(person);
+                var token = await authService.CreateUser(person, httpContext);
+                if (token == null)
+                {
+                    return Results.BadRequest(new { message = "User already exists" });
+                }
                 return Results.Ok(new { token });
             });
         }

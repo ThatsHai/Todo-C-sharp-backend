@@ -22,7 +22,8 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins("http://localhost:4200")
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         });
 });
 
@@ -54,6 +55,8 @@ builder.Services
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            // To let no expired token pass
+            ClockSkew = TimeSpan.Zero,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(key))
         };
@@ -76,6 +79,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+
+
+app.UseCors("AllowAngular");
 // Use authentication
 app.UseAuthentication();
 app.UseAuthorization();
@@ -95,12 +101,12 @@ foreach (var type in modules)
 }
 //
 
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
 
 app.Run();
